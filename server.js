@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const bodyParser = require("body-parser");
 const app = express();
+const jsonpack = require('jsonpack/main')
 const port = process.env.PORT || 8080;
 
 app.use(bodyParser.json({
@@ -14,6 +15,12 @@ app.use(bodyParser.urlencoded({
     extended: true 
 }));
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get('/', (req, res) => {
     res.send("hahaha");
 });
@@ -21,8 +28,7 @@ app.get('/', (req, res) => {
 app.post('/create', (req, res) => {
     backURL = req.header('Referer') || '/';
     
-    var data = JSON.parse(JSON.stringify(req.body.result));
-    // res.send(req.body.result);
+    var data = JSON.stringify(JSON.parse(req.body.result));
     fs.writeFile('certificate/certificate.json', data, function (err) {
         if (err) throw err;
         res.redirect(backURL);
@@ -35,8 +41,8 @@ app.get('/read', (req, res) => {
     //     res.write(data);
     //     res.end();
     // });
-    // res.sendFile('certificate/certificate.json' , { root : __dirname});
-    res.sendFile( __dirname + "/certificate/" + "certificate.json" );
+    res.sendFile('certificate/certificate.json' , { root : __dirname});
+    // res.sendFile( __dirname + "/certificate/" + "certificate.json" );
 });
 
 app.listen(port, () => {
